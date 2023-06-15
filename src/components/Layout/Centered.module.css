@@ -1,0 +1,14 @@
+body {
+    margin: 0;
+}
+
+.outer {
+    height: 100vh;
+    display: grid;
+    justify-content: center;
+}
+
+.inner {
+    display: grid;
+    align-content: center;
+}
