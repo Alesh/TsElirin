@@ -1,8 +1,10 @@
 .outer {
     padding: 1em;
     background: silver;
-    width: fit-content;
+    width: 320px;
 }
 .inner {
+    width: 100%;
+    display: inline-block;
     background: white;
 }

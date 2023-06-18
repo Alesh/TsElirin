@@ -4,7 +4,7 @@ import StreamWidget from '@/components/Widget/Stream.tsx';
 export default function App() {
   return (
     <CenteredLayout>
-      <StreamWidget streamId={'local-camera'} />
+      <StreamWidget streamId={'file:cats.mp4'} />
     </CenteredLayout>
   );
 }

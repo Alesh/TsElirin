@@ -1,4 +1,3 @@
-import { useMemo } from 'react';
 import { RpcWebSocketClient } from 'rpc-websocket-client';
 
 /// RPC Client interface
@@ -6,10 +5,20 @@ export interface RpcClient {
   call(method: string, params?: any): Promise<unknown>;
 }
 
-/// RPC Client implementation
-class PrcClientImpl implements RpcClient {
+let rpcClient: RpcClient | null = null;
+/// Creates RpcClient
+export function createPrcClient(): RpcClient {
+  if (rpcClient === null) {
+    const url = `${document.location.protocol === 'https:' ? 'wss:' : 'ws:'}//${document.location.host}/ws`;
+    rpcClient = new WebSocketClientImpl(url);
+  }
+  return rpcClient;
+}
+
+// RPC Client implementation on websocket
+class WebSocketClientImpl implements RpcClient {
   private raw: RpcWebSocketClient;
-  private connected: Promise<unknown>;
+  private readonly connected: Promise<unknown>;
 
   constructor(url: string) {
     this.raw = new RpcWebSocketClient();
@@ -20,10 +29,4 @@ class PrcClientImpl implements RpcClient {
     await this.connected;
     return await this.raw.call(method, params);
   }
-}
-
-/// RPC hook
-export default function useRpc(): RpcClient {
-  const url = `${document.location.protocol === 'https:' ? 'wss:' : 'ws:'}//${document.location.host}/ws`;
-  return useMemo(() => new PrcClientImpl(url), [url]);
 }

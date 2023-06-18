@@ -1,23 +1,24 @@
 import { createRef, FC, useEffect } from 'react';
 import classes from './Stream.module.css';
-import useRpc from '@/hooks/useRpc';
-import * as api from '@/api';
+import useRtcChannel from '@/hooks/useRtcChannel.ts';
 
 /// Stream view widget
 const StreamWidget: FC<{ streamId: string }> = ({ streamId }) => {
-  const rpc = useRpc();
   const refVideo = createRef<HTMLVideoElement>();
+  const rtcChannel = useRtcChannel(streamId);
   useEffect(() => {
-    api
-      .getStream(rpc, streamId)
+    rtcChannel
+      .getStream()
       .then((stream) => {
-        if (refVideo.current) refVideo.current.srcObject = stream;
+        if (refVideo.current) {
+          refVideo.current.srcObject = stream;
+        }
       })
       .catch(console.error);
-  }, [streamId, rpc]);
+  }, [refVideo, rtcChannel, streamId]);
   return (
     <div className={classes.outer}>
-      <video className={classes.inner} ref={refVideo} autoPlay />
+      <video className={classes.inner} ref={refVideo} playsInline autoPlay muted />
     </div>
   );
 };

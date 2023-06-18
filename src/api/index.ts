@@ -1,7 +1,5 @@
-import { RpcClient } from '@/hooks/useRpc.ts';
+import { createRtcChannel, RtcChannel } from './webrtc.ts';
+import { createPrcClient, RpcClient } from './wsrpc.ts';
 
-export async function getStream(rpc: RpcClient, streamId: string): Promise<MediaStream> {
-  const result = await rpc.call('get_answer', []);
-  console.log('@result', result);
-  throw Error(`Stream with id ${streamId} not found`);
-}
+export type { RtcChannel, RpcClient };
+export { createRtcChannel, createPrcClient };
