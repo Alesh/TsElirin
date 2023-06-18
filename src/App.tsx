@@ -1,9 +1,10 @@
-import CenteredLayout from './components/Layout/Centered';
+import CenteredLayout from '@/components/Layout/Centered';
+import StreamWidget from '@/components/Widget/Stream.tsx';
 
 export default function App() {
   return (
     <CenteredLayout>
-      <h1>Hello, world!</h1>
+      <StreamWidget streamId={'local-camera'} />
     </CenteredLayout>
   );
 }
