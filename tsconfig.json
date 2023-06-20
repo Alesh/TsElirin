@@ -23,9 +23,11 @@
 
     "baseUrl": "./",
     "paths": {
-      "@/*": ["src/*"]
+      "@/*": ["src/*"],
+      "@elirin/*": ["packages/elirin/*"]
     }
   },
-  "include": ["src"],
+  "include": ["src", "packages"],
+  "exclude": ["**/-*"],
   "references": [{ "path": "./tsconfig.node.json" }]
 }
