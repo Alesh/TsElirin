@@ -9,23 +9,32 @@ export enum ReadyState {
 export type WebSocketMessage = string | ArrayBuffer | SharedArrayBuffer | Blob | ArrayBufferView;
 
 export interface WebSocketState {
-  readyState: ReadyState;
+  readonly ready: boolean;
   lastError?: Event | Error;
   lastMessage?: WebSocketMessage;
 }
 
+export interface WebSocketMethods {
+  sendMessage(message: WebSocketMessage): void;
+
+  close(): void;
+}
+
 type SetWebSocketState = (value: WebSocketState) => void;
-// WebSocket implementation
-export default class WebSocketImpl {
+/// WebSocket implementation
+export default class WebSocketImpl implements WebSocketMethods {
   private ws: WebSocket;
-  private state: WebSocketState = { readyState: ReadyState.UNINSTANTIATED };
+  private state: WebSocketState;
   private setState: (value: Partial<WebSocketState>) => void;
   private whenReady: Promise<void>;
+
+  static DefaultState: WebSocketState = { ready: false };
 
   constructor(uri: string, setState: SetWebSocketState) {
     console.assert(uri.startsWith('/'));
     const url = `${document.location.protocol === 'https:' ? 'wss:' : 'ws:'}//${document.location.host}${uri}`;
     // initialize members
+    this.state = WebSocketImpl.DefaultState;
     this.ws = new WebSocket(url);
     this.setState = (state) => {
       this.state = { ...this.state, ...state };
@@ -42,29 +51,29 @@ export default class WebSocketImpl {
     this.ws.onopen = () => {
       clearTimeout(timeoutId);
       whenReadyResolve();
-      this.setState({ readyState: ReadyState.OPEN });
+      this.setState({ ready: true });
     };
     this.ws.onmessage = (ev) => this.setState({ lastMessage: ev.data, lastError: undefined });
-    this.ws.onerror = (ev) => this.setState({ lastError: ev });
+    this.ws.onerror = (ev) => this.setState({ lastError: ev, lastMessage: undefined });
     this.ws.onclose = (ev) =>
       this.setState({
-        readyState: ReadyState.CLOSED,
+        ready: false,
+        lastMessage: undefined,
         ...(ev.code == 1000 ? {} : { lastError: ev }),
       });
-    this.setState({ readyState: ReadyState.CONNECTING });
   }
 
   /// Sends message
   public sendMessage(message: WebSocketMessage) {
-    if (this.state.readyState == ReadyState.OPEN) {
+    if (this.ws.readyState == ReadyState.OPEN) {
       this.ws.send(message);
-    } else if (this.state.readyState == ReadyState.CONNECTING) this.whenReady.then(() => this.sendMessage(message));
-    else this.setState({ lastError: new Error('WebSocket is not ready') });
+    } else if (this.ws.readyState == ReadyState.CONNECTING) this.whenReady.then(() => this.sendMessage(message));
+    else this.setState({ lastError: new Error('WebSocket is not ready'), lastMessage: undefined });
   }
 
   /// Close
   public close() {
-    this.setState({ readyState: ReadyState.CLOSING });
+    this.setState({ ready: false, lastMessage: undefined, lastError: undefined });
     this.ws.close();
   }
 }
