@@ -6,7 +6,7 @@ export interface UseWebCamera extends WebCameraState, WebCameraMethods {}
 
 /// WebCamera hook
 export default function useWebCamera(): UseWebCamera {
-  const [state, setState] = useState<WebCameraState>(WebCamera.DefaultState);
+  const [state, setState] = useState<WebCameraState>(WebCamera.defaultState);
   const webCamera = useMemo(() => new WebCamera(setState), [setState]);
-  return { ...state, switchStream: webCamera.switchStream.bind(webCamera) };
+  return { ...state, ...webCamera.invokeInterfaceMethods() };
 }

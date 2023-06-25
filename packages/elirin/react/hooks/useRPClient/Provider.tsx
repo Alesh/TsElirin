@@ -2,8 +2,8 @@ import { createContext, PropsWithChildren, useEffect, useMemo } from 'react';
 import useWebSocket from '@elirin/react/hooks/useWebSocket';
 import JSONRPClient, { ProtocolState } from './JSONRPClient.ts';
 
-export type UseRPC = { call<T>(method: string, params?: unknown): Promise<T> };
-export const RPCContext = createContext<UseRPC>({} as never);
+export type UseRPClient = { call<T>(method: string, params?: unknown): Promise<T> };
+export const RPCContext = createContext<UseRPClient>({} as never);
 
 type RPCProviderProps = PropsWithChildren<{ wsUri: string; timeout?: number }>;
 /// RPC Provider

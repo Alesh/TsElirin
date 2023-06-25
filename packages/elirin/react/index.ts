@@ -1,3 +1,3 @@
-import { useRPC, useWebSocket, UseRPC, UseWebSocket } from './hooks';
-export type { UseRPC, UseWebSocket };
+import { useRPC, useWebSocket, UseRPClient, UseWebSocket } from './hooks';
+export type { UseRPClient, UseWebSocket };
 export { useRPC, useWebSocket };

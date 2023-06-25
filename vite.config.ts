@@ -1,4 +1,5 @@
 import { defineConfig } from 'vite';
+import svgr from 'vite-plugin-svgr';
 import react from '@vitejs/plugin-react';
 import path from 'path';
 
@@ -19,5 +20,5 @@ export default defineConfig({
       '@elirin': path.resolve(__dirname, './packages/elirin'),
     },
   },
-  plugins: [react()],
+  plugins: [react(), svgr()],
 });

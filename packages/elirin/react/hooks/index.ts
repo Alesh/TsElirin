@@ -1,4 +1,4 @@
-import useRPC, { UseRPC } from './useRPC';
+import useRPC, { UseRPClient } from './useRPClient';
 import useWebSocket, { UseWebSocket } from './useWebSocket';
-export type { UseRPC, UseWebSocket };
+export type { UseRPClient, UseWebSocket };
 export { useRPC, useWebSocket };

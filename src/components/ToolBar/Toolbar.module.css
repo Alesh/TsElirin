@@ -1,0 +1,17 @@
+.outer {
+    display: grid;
+    justify-content: right;
+    height: 4em;
+    width: 100%;
+}
+
+.inner {
+    display: flex;
+    padding: 0.5em;
+    gap: 0.5em;
+}
+
+.inner svg {
+    width: auto;
+    height: 3em;
+}

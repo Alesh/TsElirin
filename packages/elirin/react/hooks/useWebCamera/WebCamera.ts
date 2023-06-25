@@ -7,16 +7,15 @@ export interface WebCameraState {
 
 /// WebCamera methods
 export interface WebCameraMethods {
-  switchStream(constraints?: MediaStreamConstraints): void;
+  switchStream(constraints?: MediaStreamConstraints | 'off'): void;
 }
 
-type SetWebCameraState = (value: WebCameraState) => void;
+type SetState = (value: WebCameraState) => void;
 /// WebCamera implementation
 export default class WebCameraImpl implements WebCameraMethods {
   private readonly hasMediaDevices: boolean;
   private state: WebCameraState;
   private readonly setState: (value: Partial<WebCameraState>) => void;
-  private readonly defaultStreamConstraints: MediaStreamConstraints;
 
   private async getStream(constraints: MediaStreamConstraints): Promise<MediaStream> {
     if (this.hasMediaDevices) {
@@ -26,25 +25,36 @@ export default class WebCameraImpl implements WebCameraMethods {
     }
   }
 
-  static DefaultState: WebCameraState = { permission: false };
-  constructor(setState: SetWebCameraState) {
+  static defaultState: WebCameraState = { permission: false };
+  constructor(setState: SetState) {
     // initialize members
-    this.state = WebCameraImpl.DefaultState;
-    this.defaultStreamConstraints = { video: true };
+    this.state = WebCameraImpl.defaultState;
     this.hasMediaDevices = 'mediaDevices' in navigator && 'getUserMedia' in navigator.mediaDevices;
     this.setState = (state) => {
       this.state = { ...this.state, ...state };
       setState(this.state);
     };
-    this.getStream(this.defaultStreamConstraints)
-      .then((stream) => this.setState({ stream, permission: true, lastError: undefined }))
-      .catch((error) => this.setState({ lastError: error, stream: undefined }));
   }
 
   /// Switches webcam stream mode
-  switchStream(constraints: MediaStreamConstraints) {
-    this.getStream(constraints)
-      .then((stream) => this.setState({ stream, lastError: undefined }))
-      .catch((error) => this.setState({ lastError: error, stream: undefined }));
+  switchStream(constraints: MediaStreamConstraints | 'on' | 'off') {
+    if (constraints === 'off') {
+      if (this.state.stream) {
+        this.state.stream.getTracks().forEach((track) => track.stop());
+        this.setState({ stream: undefined });
+      }
+    } else {
+      constraints = constraints === 'on' ? { video: true, audio: true } : constraints;
+      this.getStream(constraints)
+        .then((stream) => this.setState({ stream, lastError: undefined }))
+        .catch((error) => this.setState({ lastError: error, stream: undefined }));
+    }
+  }
+
+  /// Invokes WebCameraMethods interface
+  invokeInterfaceMethods(): WebCameraMethods {
+    return {
+      switchStream: this.switchStream.bind(this),
+    };
   }
 }

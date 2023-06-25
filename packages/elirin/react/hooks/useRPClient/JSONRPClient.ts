@@ -47,8 +47,11 @@ export default class JSONRPClientImpl {
       const [resolve, reject, timeoutId] = pending;
       this.pendingMap.delete(id);
       clearTimeout(timeoutId);
-      if (isJSONRPCError(result)) reject(new JSONRPCErrorImpl(result));
-      else resolve(result);
+      if (isJSONRPCError(result)) {
+        const error = new JSONRPCErrorImpl(result);
+        console.error(error);
+        reject(error);
+      } else resolve(result);
       return true;
     }
     return false;
@@ -67,7 +70,7 @@ export default class JSONRPClientImpl {
     if (protocolState.lastMessage) {
       const message = JSON.parse(protocolState.lastMessage);
       if (isJSONRPCResponse(message)) this.processResponse(message);
-      if (isJSONRPCResponses(message)) Array.from<JSONRPCResponse>(message).map((item) => this.processResponse(item));
+      else if (isJSONRPCResponses(message)) Array.from<JSONRPCResponse>(message).map((item) => this.processResponse(item));
     }
   }
 

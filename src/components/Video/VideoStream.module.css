@@ -1,10 +1,10 @@
 .outer {
-    height: 100vh;
     display: grid;
     justify-content: center;
+    background: #FAFAFA;
 }
-
 .inner {
     display: grid;
-    align-content: center;
+    width: 100%;
+    fill: silver;
 }

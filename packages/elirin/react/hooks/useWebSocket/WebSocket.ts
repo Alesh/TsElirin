@@ -28,13 +28,13 @@ export default class WebSocketImpl implements WebSocketMethods {
   private setState: (value: Partial<WebSocketState>) => void;
   private whenReady: Promise<void>;
 
-  static DefaultState: WebSocketState = { ready: false };
+  static defaultState: WebSocketState = { ready: false };
 
   constructor(uri: string, setState: SetWebSocketState) {
     console.assert(uri.startsWith('/'));
     const url = `${document.location.protocol === 'https:' ? 'wss:' : 'ws:'}//${document.location.host}${uri}`;
     // initialize members
-    this.state = WebSocketImpl.DefaultState;
+    this.state = WebSocketImpl.defaultState;
     this.ws = new WebSocket(url);
     this.setState = (state) => {
       this.state = { ...this.state, ...state };

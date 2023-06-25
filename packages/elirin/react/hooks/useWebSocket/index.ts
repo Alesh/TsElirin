@@ -5,7 +5,7 @@ export interface UseWebSocket extends WebSocketState, WebSocketMethods {}
 
 /// WebSocket hook
 export default function useWebSocket(uri = '/ws'): UseWebSocket {
-  const [state, setState] = useState<WebSocketState>(WebSocket.DefaultState);
+  const [state, setState] = useState<WebSocketState>(WebSocket.defaultState);
   const webSocket = useMemo(() => new WebSocket(uri, setState), [uri]);
   return { ...state, sendMessage: webSocket.sendMessage.bind(webSocket), close: webSocket.close.bind(webSocket) };
 }
