@@ -1,4 +1,5 @@
 import { defineConfig } from 'vite';
+import svgr from 'vite-plugin-svgr';
 import react from '@vitejs/plugin-react';
 import path from 'path';
 
@@ -9,5 +10,5 @@ export default defineConfig({
       '@': path.resolve(__dirname, './src'),
     },
   },
-  plugins: [react()],
+  plugins: [react(), svgr()],
 });

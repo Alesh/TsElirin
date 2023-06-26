@@ -1,5 +1,5 @@
 import { FC, PropsWithChildren } from 'react';
-import classes from './Centered.module.css';
+import classes from './CenteredLayout.module.css';
 
 /// Layout with one centered view
 const CenteredLayout: FC<PropsWithChildren> = ({ children }) => (
