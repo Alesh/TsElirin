@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import CenteredLayout from '@/components/layouts/CenteredLayout';
 import Toolbar, { CameraButton, MicButton, PublishButton } from '@/components/ui/ToolBar';
 import VideoStream from '@/components/ui/VideoStream';
@@ -12,6 +12,9 @@ export default function VideoTest() {
   const subscribed = useSubscribedStream('local-camera');
   type Controls = { mute: boolean; camera: boolean; publish: boolean };
   const [controls, setControls] = useState<Controls>({ mute: true, camera: true, publish: false });
+  useEffect(() => {
+    webCamera.switchStream({ audio: !controls.mute, video: controls.camera });
+  }, [controls.mute, controls.camera]);
   return (
     <CenteredLayout>
       <div className={classes.wrapper}>
