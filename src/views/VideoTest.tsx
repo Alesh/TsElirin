@@ -2,24 +2,33 @@ import { useEffect, useState } from 'react';
 import CenteredLayout from '@/components/layouts/CenteredLayout';
 import Toolbar, { CameraButton, MicButton, PublishButton } from '@/components/ui/ToolBar';
 import VideoStream from '@/components/ui/VideoStream';
-import useSubscribedStream from '@/hooks/useSubscribedStream';
+import useRemoteStream from '@/hooks/useRemoteStream.ts';
 import useWebCamera from '@/hooks/useWebCamera';
 import classes from './styles/VideoTest.module.css';
+import useLocalStream from '@/hooks/useLocalStream.ts';
+
+const cameraStreamKey = 'local-camera-stream';
 
 /// Page "Video test"
 export default function VideoTest() {
   const webCamera = useWebCamera();
-  const subscribed = useSubscribedStream('local-camera');
+  const local = useLocalStream();
+  const remote = useRemoteStream(cameraStreamKey);
   type Controls = { mute: boolean; camera: boolean; publish: boolean };
   const [controls, setControls] = useState<Controls>({ mute: true, camera: true, publish: false });
   useEffect(() => {
     webCamera.switchStream({ audio: !controls.mute, video: controls.camera });
   }, [controls.mute, controls.camera]);
+  useEffect(() => {
+    if (controls.publish) {
+      if (webCamera.stream) local.publish(webCamera.stream, cameraStreamKey);
+    } else local.cancel();
+  }, [webCamera.stream, controls.publish]);
   return (
     <CenteredLayout>
       <div className={classes.wrapper}>
         <VideoStream className={classes.localStream} stream={webCamera.stream} />
-        <VideoStream stream={subscribed.stream} showPlaceholder />
+        <VideoStream stream={remote.stream} showPlaceholder />
         <Toolbar className={classes.controlBar}>
           <MicButton mute={controls.mute} setMute={(setter) => setControls((prev) => ({ ...prev, mute: setter(prev.mute) }))} />
           <CameraButton active={controls.camera} setActive={(setter) => setControls((prev) => ({ ...prev, camera: setter(prev.camera) }))} />
