@@ -1294,6 +1294,11 @@ json-parse-even-better-errors@^2.3.0:
   resolved "https://registry.yarnpkg.com/json-parse-even-better-errors/-/json-parse-even-better-errors-2.3.1.tgz#7c47805a94319928e05777405dc12e1f7a4ee02d"
   integrity sha512-xyFwyhro/JEof6Ghe2iz2NcXoj2sloNsWr/XsERDK/oiPCfaNhl5ONfp+jQdAZRQQ0IJWNzH9zIZF7li91kh2w==
 
+json-rpc-2.0@^1.6.0:
+  version "1.6.0"
+  resolved "https://registry.yarnpkg.com/json-rpc-2.0/-/json-rpc-2.0-1.6.0.tgz#60770ca98f663376126af7335ed2d30164691c89"
+  integrity sha512-+pKxaoIqnA5VjXmZiAI1+CkFG7mHLg+dhtliOe/mp1P5Gdn8P5kE/Xxp2CUBwnGL7pfw6gC8zWTWekhSnKzHFA==
+
 json-schema-traverse@^0.4.1:
   version "0.4.1"
   resolved "https://registry.yarnpkg.com/json-schema-traverse/-/json-schema-traverse-0.4.1.tgz#69f6a87d9513ab8bb8fe63bdb0979c448e684660"
@@ -1739,6 +1744,11 @@ vite@^4.3.9:
     rollup "^3.21.0"
   optionalDependencies:
     fsevents "~2.3.2"
+
+websocket-ts@^1.1.1:
+  version "1.1.1"
+  resolved "https://registry.yarnpkg.com/websocket-ts/-/websocket-ts-1.1.1.tgz#de482da5e0c714ebc58a43fe94157e5a855f2828"
+  integrity sha512-rm+S60J74Ckw5iizzgID12ju+OfaHAa6dhXhULIOrXkl0e05RzxfY42/vMStpz5jWL3iz9mkyjPcFUY1IgI0fw==
 
 which@^2.0.1:
   version "2.0.2"

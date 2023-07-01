@@ -2,10 +2,10 @@ import { useEffect, useState } from 'react';
 import CenteredLayout from '@/components/layouts/CenteredLayout';
 import Toolbar, { CameraButton, MicButton, PublishButton } from '@/components/ui/ToolBar';
 import VideoStream from '@/components/ui/VideoStream';
-import useRemoteStream from '@/hooks/useRemoteStream.ts';
+import useRemoteStream from '@/hooks/useRemoteStream';
 import useWebCamera from '@/hooks/useWebCamera';
 import classes from './styles/VideoTest.module.css';
-import useLocalStream from '@/hooks/useLocalStream.ts';
+import useLocalStream from '@/hooks/useLocalStream';
 
 const cameraStreamKey = 'local-camera-stream';
 
