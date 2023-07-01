@@ -5,6 +5,7 @@ import { createBrowserRouter, createRoutesFromElements, Navigate, Route, RouterP
 import * as JsonRPC2 from '@/contexts/JsonRPC2';
 import HomePage from '@/views/HomePage';
 import VideoTest from '@/views/VideoTest';
+import Connecting from '@/views/Connecting';
 
 // Application root routes
 const routes = createRoutesFromElements(
@@ -18,7 +19,7 @@ const routes = createRoutesFromElements(
 // Application root
 ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
   <React.StrictMode>
-    <JsonRPC2.Provider uri={'/rpc'}>
+    <JsonRPC2.Provider uri={'/rpc'} otherwise={<Connecting />}>
       <RouterProvider router={createBrowserRouter(routes)} />
     </JsonRPC2.Provider>
   </React.StrictMode>

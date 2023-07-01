@@ -8,7 +8,7 @@ export default function HomePage() {
   const rpc = useJsonRPC2();
   const [msg, setMsg] = useState<string>();
   useEffect(() => {
-    rpc.ready && rpc.call('get_greeting').then(setMsg);
+    rpc.call('get_greeting').then(setMsg);
   }, [rpc]);
   return (
     <CenteredLayout>
