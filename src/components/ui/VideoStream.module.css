@@ -1,0 +1,10 @@
+.outer {
+    display: grid;
+    justify-content: center;
+    background: #FAFAFA;
+}
+.inner {
+    display: grid;
+    width: 100%;
+    fill: silver;
+}

@@ -1,0 +1,27 @@
+.wrapper {
+    max-width: 640px;
+    max-height: 480px;
+    position: relative;
+}
+
+
+.localStream {
+    composes: outer from "@/components/ui/VideoStream.module.css";
+    width: 40%;
+    height: 40%;
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    background: transparent;
+}
+
+.controlBar {
+    composes: outer from "@/components/ui/ToolBar/Toolbar.module.css";
+    position: absolute;
+    left: 0;
+    bottom: 0;
+}
+
+.controlBar svg {
+    padding: 0.25em;
+}
