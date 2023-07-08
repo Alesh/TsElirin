@@ -1,17 +1,21 @@
-import { Methods, SetState, State } from './interface.ts';
+import { JsonRPC2Methods, SetState, State } from './interface.ts';
+import JsonRPC2, { DataChannelTransport } from '@/contexts/UniChan/JsonRPC2.ts';
 
 export type UniChanProps = Partial<{
   entryURI: string;
   reconnectAt: number;
+  rpc_timeout: number;
   rtcConfiguration: RTCConfiguration;
 }>;
 /// UniChan implementation
-export default class UniChanImpl implements Methods {
+export default class UniChanImpl {
   private state: State = {} as never;
   private readonly setState: (state: Partial<State>) => void;
 
+  private jsonRPC2: JsonRPC2;
   private peerConnection: RTCPeerConnection;
   private rpc_data_channel: RTCDataChannel;
+
   // Sends offer to remote the side
   private static async sendCallOffer(uri: string, offer: RTCSessionDescription): Promise<RTCSessionDescriptionInit> {
     const resp = await fetch(uri, {
@@ -26,6 +30,7 @@ export default class UniChanImpl implements Methods {
       return await resp.json();
     } else throw new Error('Cannot get answer from remote side');
   }
+
   // ICE gathering
   private static async iceGathering(peerConnection: RTCPeerConnection): Promise<void> {
     if (peerConnection.iceGatheringState !== 'complete') {
@@ -40,6 +45,7 @@ export default class UniChanImpl implements Methods {
       });
     }
   }
+
   // Establishes connects to remote side
   private async establishConnection(uri: string): Promise<void> {
     this.peerConnection.addTransceiver('video', { direction: 'sendrecv' });
@@ -54,9 +60,11 @@ export default class UniChanImpl implements Methods {
     await UniChanImpl.iceGathering(this.peerConnection);
   }
 
-  constructor(setState: SetState, { entryURI = '/unichan', reconnectAt = 5, rtcConfiguration }: UniChanProps = {}) {
+  constructor(setState: SetState, { entryURI = '/unichan', reconnectAt = 5, rpc_timeout, rtcConfiguration }: UniChanProps = {}) {
+    // initialize members
     this.peerConnection = new RTCPeerConnection(rtcConfiguration);
     this.rpc_data_channel = this.peerConnection.createDataChannel('RPC');
+    this.jsonRPC2 = new JsonRPC2(new DataChannelTransport(this.rpc_data_channel), rpc_timeout);
     this.setState = (partialState) => {
       this.state = { ...this.state, ...partialState };
       setState(this.state);
@@ -79,16 +87,10 @@ export default class UniChanImpl implements Methods {
         this.setState({ ready: true });
       } else if (connectionState != 'new' && connectionState != 'connecting') this.setState({ ready: false });
     };
-    //
-    this.rpc_data_channel.onopen = () => this.rpc_data_channel.send('PING!');
-    this.rpc_data_channel.onmessage = (ev) => {
-      if (ev.data === 'PING!') this.rpc_data_channel.send('PONG!');
-      else console.log('>>', ev.data);
-    };
   }
 
-  call<T>(method: string, params?: unknown): Promise<T> {
-    console.log('!UniChanImpl.call', method, params);
-    throw new Error('Not yet implemented');
+  /// RPC interface
+  get rpc(): JsonRPC2Methods {
+    return this.jsonRPC2;
   }
 }

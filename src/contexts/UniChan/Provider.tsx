@@ -11,5 +11,5 @@ export default function Provider(props: Props) {
   const { children, otherwise, ...propsUniChan } = props;
   const [state, setState] = useState<State>({} as never);
   const impl = useMemo(() => new UniChanImpl(setState, propsUniChan), [props]);
-  return state.ready ? <Context.Provider value={{ call: impl.call.bind(impl) }}>{children}</Context.Provider> : otherwise;
+  return state.ready ? <Context.Provider value={{ rpc: impl.rpc }}>{children}</Context.Provider> : otherwise;
 }

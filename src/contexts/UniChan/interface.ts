@@ -6,11 +6,21 @@ export interface State {
 /// UniChan state set type
 export type SetState = (value: ((prevState: State) => State) | State) => void;
 
-/// UniChan methods interface
-export interface Methods {
-  /// Remote calls to this method with given parameters
+/// JSON-RPC 2.0 methods interface
+export interface JsonRPC2Methods {
+  /// Remote calls a method with given parameters
   call<T>(method: string, params?: unknown): Promise<T>;
 }
 
+/// JSON-RPC 2.0 transport interface
+export interface JsonRPC2Transport {
+  /// Sends message to a remote side
+  send(message: string): Promise<void>;
+  /// Bind event listeners
+  bind(onMessage: (message: string) => void, onClose: () => void): void;
+}
+
 /// UniChan use interface
-export type UseUniChan = Methods;
+export type UseUniChan = {
+  rpc: JsonRPC2Methods;
+};
