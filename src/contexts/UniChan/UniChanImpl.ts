@@ -1,32 +1,60 @@
 import { Methods, SetState, State } from './interface.ts';
 
 export type UniChanProps = Partial<{
-  uri: string;
-  reconnect_at: number;
+  entryURI: string;
+  reconnectAt: number;
+  rtcConfiguration: RTCConfiguration;
 }>;
 /// UniChan implementation
 export default class UniChanImpl implements Methods {
   private state: State = {} as never;
   private readonly setState: (state: Partial<State>) => void;
 
-  // Connects to remote side
-  private async connect(uri: string): Promise<void> {
-    const offer = {};
+  private peerConnection: RTCPeerConnection;
+  // Sends offer to remote the side
+  private static async sendCallOffer(uri: string, offer: RTCSessionDescription): Promise<RTCSessionDescriptionInit> {
     const resp = await fetch(uri, {
       method: 'POST',
       headers: {
         Accept: 'application/json',
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify(offer),
+      body: JSON.stringify(offer.toJSON()),
     });
     if (resp.ok) {
-      const answer = await resp.json();
-      console.log('!UniChanImpl.connect:answer', answer);
-    } else throw new Error('Cannot connect to remote side');
+      return await resp.json();
+    } else throw new Error('Cannot get answer from remote side');
+  }
+  // ICE gathering
+  private static async iceGathering(peerConnection: RTCPeerConnection): Promise<void> {
+    if (peerConnection.iceGatheringState !== 'complete') {
+      await new Promise(function (resolve) {
+        const checkGatheringState = () => {
+          if (peerConnection.iceGatheringState === 'complete') {
+            peerConnection.removeEventListener('icegatheringstatechange', checkGatheringState);
+            resolve(undefined);
+          }
+        };
+        peerConnection.addEventListener('icegatheringstatechange', checkGatheringState);
+      });
+    }
+  }
+  // Establishes connects to remote side
+  private async establishConnection(uri: string): Promise<void> {
+    this.peerConnection.addTransceiver('video', { direction: 'sendrecv' });
+    this.peerConnection.addTransceiver('audio', { direction: 'sendrecv' });
+    // offer/answer exchange
+    const sessionDescriptionInit = await this.peerConnection.createOffer();
+    await this.peerConnection.setLocalDescription(sessionDescriptionInit);
+    if (!this.peerConnection.localDescription) throw new Error('Cannot set local RTC session description');
+    const answer = await UniChanImpl.sendCallOffer(uri, this.peerConnection.localDescription);
+    await this.peerConnection.setRemoteDescription(answer);
+    // await connection complete
+    await UniChanImpl.iceGathering(this.peerConnection);
   }
 
-  constructor(setState: SetState, { uri = '/unichan', reconnect_at = 5 }: UniChanProps = {}) {
+  constructor(setState: SetState, { entryURI = '/unichan', reconnectAt = 5, rtcConfiguration }: UniChanProps = {}) {
+    this.peerConnection = new RTCPeerConnection(rtcConfiguration);
     this.setState = (partialState) => {
       this.state = { ...this.state, ...partialState };
       setState(this.state);
@@ -34,19 +62,20 @@ export default class UniChanImpl implements Methods {
     // Set initial state
     this.setState({ ready: false });
     // Connect to remote side
-    this.connect(uri)
-      .then(() => this.setState({ ready: true }))
-      .catch((err) => {
-        console.error(err);
-        const timerId = setInterval(() => {
-          this.connect(uri)
-            .then(() => {
-              clearInterval(timerId);
-              this.setState({ ready: true });
-            })
-            .catch(console.error);
-        }, reconnect_at * 1000);
-      });
+    this.establishConnection(entryURI).catch((err) => {
+      console.error(err);
+      const timerId = setInterval(() => {
+        this.establishConnection(entryURI)
+          .then(() => clearInterval(timerId))
+          .catch(console.error);
+      }, reconnectAt * 1000);
+    });
+    //
+    this.peerConnection.onconnectionstatechange = () => {
+      const connectionState = this.peerConnection.connectionState;
+      if (connectionState == 'connected') this.setState({ ready: true });
+      else if (connectionState != 'new' && connectionState != 'connecting') this.setState({ ready: false });
+    };
   }
 
   call<T>(method: string, params?: unknown): Promise<T> {
