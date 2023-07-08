@@ -1,8 +1,21 @@
-import { JsonRPC2Methods, JsonRPC2Transport } from './interface.ts';
 import { JSONRPCClient } from 'json-rpc-2.0';
 
+/// JSON-RPC 2.0 methods interface
+export interface Methods {
+  /// Remote calls a method with given parameters
+  call<T>(method: string, params?: unknown): Promise<T>;
+}
+
+/// JSON-RPC 2.0 transport interface
+export interface Transport {
+  /// Sends message to a remote side
+  send(message: string): Promise<void>;
+  /// Bind event listeners
+  bind(onMessage: (message: string) => void, onClose: () => void): void;
+}
+
 /// Transport based on RTC data channel
-export class DataChannelTransport implements JsonRPC2Transport {
+export class DataChannelTransport implements Transport {
   constructor(private dataChannel: RTCDataChannel) {}
 
   bind(onMessage: (message: string) => void, onClose: () => void): void {
@@ -20,8 +33,8 @@ export class DataChannelTransport implements JsonRPC2Transport {
   }
 }
 
-/// JSON-RPC 2.0
-export default class JsonRPC2 implements JsonRPC2Methods {
+/// JSON-RPC 2.0 state/methods implementation
+export class Impl implements Methods {
   private rpcClient: JSONRPCClient<void>;
 
   private onMessage: OmitThisParameter<(message: unknown) => void>;
@@ -39,7 +52,7 @@ export default class JsonRPC2 implements JsonRPC2Methods {
     this.rpcClient.rejectAllPendingRequests(err?.message ?? '');
   }
 
-  constructor(transport: JsonRPC2Transport, private timeout: number = 180) {
+  constructor(transport: Transport, private timeout: number = 180) {
     this.onMessage = this.messageReceived.bind(this);
     this.onClose = this.closeTransport.bind(this);
     transport.bind(this.onMessage, this.onClose);
