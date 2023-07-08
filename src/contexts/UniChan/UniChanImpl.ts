@@ -11,6 +11,7 @@ export default class UniChanImpl implements Methods {
   private readonly setState: (state: Partial<State>) => void;
 
   private peerConnection: RTCPeerConnection;
+  private rpc_data_channel: RTCDataChannel;
   // Sends offer to remote the side
   private static async sendCallOffer(uri: string, offer: RTCSessionDescription): Promise<RTCSessionDescriptionInit> {
     const resp = await fetch(uri, {
@@ -55,6 +56,7 @@ export default class UniChanImpl implements Methods {
 
   constructor(setState: SetState, { entryURI = '/unichan', reconnectAt = 5, rtcConfiguration }: UniChanProps = {}) {
     this.peerConnection = new RTCPeerConnection(rtcConfiguration);
+    this.rpc_data_channel = this.peerConnection.createDataChannel('RPC');
     this.setState = (partialState) => {
       this.state = { ...this.state, ...partialState };
       setState(this.state);
@@ -73,8 +75,15 @@ export default class UniChanImpl implements Methods {
     //
     this.peerConnection.onconnectionstatechange = () => {
       const connectionState = this.peerConnection.connectionState;
-      if (connectionState == 'connected') this.setState({ ready: true });
-      else if (connectionState != 'new' && connectionState != 'connecting') this.setState({ ready: false });
+      if (connectionState == 'connected') {
+        this.setState({ ready: true });
+      } else if (connectionState != 'new' && connectionState != 'connecting') this.setState({ ready: false });
+    };
+    //
+    this.rpc_data_channel.onopen = () => this.rpc_data_channel.send('PING!');
+    this.rpc_data_channel.onmessage = (ev) => {
+      if (ev.data === 'PING!') this.rpc_data_channel.send('PONG!');
+      else console.log('>>', ev.data);
     };
   }
 
