@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 export interface WebCameraState {
   stream?: MediaStream;
   permission: boolean;
-  lastError?: Error;
+  lastError?: unknown;
 }
 
 /// WebCamera methods
@@ -17,7 +17,7 @@ type UseWebCamera = WebCameraState & WebCameraMethods;
 export default function useWebCamera(): UseWebCamera {
   const [state, setState] = useState<WebCameraState>({ permission: false });
   // Turns on cam stream
-  async function turnOnStream(constraints: MediaStreamConstraints): Promise<MediaStream> {
+  async function turnOnStream(constraints: MediaStreamConstraints): Promise<void> {
     if ('mediaDevices' in navigator && 'getUserMedia' in navigator.mediaDevices) {
       try {
         const stream = await navigator.mediaDevices.getUserMedia(constraints);

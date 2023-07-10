@@ -19,9 +19,9 @@ const routes = createRoutesFromElements(
 
 // Application root
 ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
-  <React.StrictMode>
-    <UniChanProvider otherwise={<CenteredLayout>Please waite, connecting to remote a site ...</CenteredLayout>}>
-      <RouterProvider router={createBrowserRouter(routes)} />
-    </UniChanProvider>
-  </React.StrictMode>
+  // <React.StrictMode>
+  <UniChanProvider otherwise={<CenteredLayout>Please waite, connecting to remote a site ...</CenteredLayout>}>
+    <RouterProvider router={createBrowserRouter(routes)} />
+  </UniChanProvider>
+  // </React.StrictMode>
 );

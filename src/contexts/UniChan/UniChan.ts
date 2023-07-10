@@ -1,13 +1,17 @@
-import * as JsonRPC2 from './JsonRPC.ts';
 import * as WebRTC from './WebRTC.ts';
-import * as JsonRPC from '@/contexts/UniChan/JsonRPC.ts';
+import * as JsonRPC from './JsonRPC.ts';
 
 export interface State extends WebRTC.State {
   remoteStreams: Record<string, MediaStream>;
 }
 
 export interface Methods {
-  rpc: JsonRPC2.Methods;
+  /// RPC interface
+  rpc: JsonRPC.Methods;
+  /// Tries to publish local stream
+  publishStream(key: string, src: MediaStream): Promise<boolean>;
+  /// Cancels publish local stream
+  unPublishStream(key: string): Promise<void>;
 }
 
 /// Sends offer to remote the side and awaits answer
@@ -34,35 +38,31 @@ export class Impl implements Methods {
   private webrtc: WebRTC.Impl;
   private jsonrpc: JsonRPC.Impl;
 
-  // Establishes connects to the remote side
-  private async establishConnection(entryURI = '/unichan') {
-    const offer = await this.webrtc.startConnecting();
-    const answer = await exchangeOfferAnswer(entryURI, offer);
-    await this.webrtc.continueConnecting(answer);
-  }
-
-  constructor(setState: SetState, { entryURI, rpcTimeout = 180, ...rtcProps }: Props) {
+  constructor(setState: SetState, { entryURI = '/unichan', rpcTimeout = 180, ...rtcProps }: Props) {
     this.setState = (partialState) => {
       this.state = { ...this.state, ...partialState };
       setState(this.state);
     };
-    this.webrtc = new WebRTC.Impl(this.setState as WebRTC.SetState, rtcProps);
+    this.webrtc = new WebRTC.Impl(this.setState as WebRTC.SetState, async (offer) => exchangeOfferAnswer(entryURI, offer), rtcProps);
     this.jsonrpc = new JsonRPC.Impl(new JsonRPC.DataChannelTransport(this.webrtc.createDataChannel('RPC')), rpcTimeout);
     // Set initial state
     this.setState({ remoteStreams: {} });
-    // Starts connecting
-    this.establishConnection(entryURI).catch((err) => {
-      console.error(err);
-      const timerId = setInterval(() => {
-        this.establishConnection(entryURI)
-          .then(() => clearInterval(timerId))
-          .catch(console.error);
-      }, rpcTimeout * 1000);
-    });
   }
 
   /// RPC interface
   get rpc(): JsonRPC.Methods {
-    return this.jsonrpc;
+    return {
+      call: (...args) => this.jsonrpc.call(...args),
+    };
+  }
+
+  /// Tries to publish local stream
+  async publishStream(key: string, src: MediaStream): Promise<boolean> {
+    return await this.webrtc.publishStream(this.rpc, key, src);
+  }
+
+  /// Cancels publish local stream
+  async unPublishStream(key: string): Promise<void> {
+    await this.webrtc.unPublishStream(this.rpc, key);
   }
 }

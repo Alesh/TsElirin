@@ -1,13 +1,13 @@
 import { useEffect, useState } from 'react';
 
 /// Remote stream use interface
-export interface UseRemoteStream {
+export interface UseStream {
   stream?: MediaStream;
   subscribe(streamKey: string): void;
   cancel(): void;
 }
 /// Hook help to subscribe to remote stream
-export default function useRemoteStream(streamKey?: string): UseRemoteStream {
+export default function useRemoteStream(streamKey?: string): UseStream {
   const [key, setKey] = useState<string | undefined>(streamKey);
   const [stream, setStream] = useState<MediaStream | undefined>();
   // Subscribes to a stream from remote peer.

@@ -2,28 +2,32 @@ import { useEffect, useState } from 'react';
 import CenteredLayout from '@/components/layouts/Centered';
 import Toolbar, { CameraButton, MicButton, PublishButton } from '@/components/ui/ToolBar';
 import VideoStream from '@/components/ui/VideoStream';
-import useRemoteStream from '@/hooks/useRemoteStream';
+import useRemoteStream from '@/hooks/useStream.ts';
 import useWebCamera from '@/hooks/useWebCamera';
 import classes from './styles/VideoTest.module.css';
+import useUniChan from '@/hooks/useUniChan.ts';
 
 const cameraStreamKey = 'local-camera-stream';
 
 /// Page "Video test"
 export default function VideoTest() {
+  const uniChan = useUniChan();
   const webCamera = useWebCamera();
   const remote = useRemoteStream(cameraStreamKey);
+  const [publishing, setPublishing] = useState(false);
   type Controls = { mute: boolean; camera: boolean; publish: boolean };
   const [controls, setControls] = useState<Controls>({ mute: true, camera: true, publish: false });
   useEffect(() => {
     webCamera.switchStream({ audio: !controls.mute, video: controls.camera });
   }, [controls.mute, controls.camera]);
-  /*
+
   useEffect(() => {
     if (controls.publish) {
-      if (webCamera.stream) local.publish(webCamera.stream, cameraStreamKey);
-    } else local.cancel();
+      if (webCamera.stream) uniChan.publishStream(cameraStreamKey, webCamera.stream).then(setPublishing);
+    } else if (publishing) uniChan.unPublishStream(cameraStreamKey).then();
   }, [webCamera.stream, controls.publish]);
-  */
+
+  console.log(uniChan, webCamera);
   return (
     <CenteredLayout>
       <div className={classes.wrapper}>
